@@ -1,12 +1,12 @@
 // Calendar page
 
 import { Store } from '../store.js';
-import { $, getMonthDays, isToday, isSameMonth, days, getDateString } from '../utils.js';
+import { Modal } from '../components/modal.js';
+import { $, getMonthDays, isToday, days, getDateString } from '../utils.js';
 
 export const CalendarPage = {
   container: null,
   currentDate: new Date(),
-  selectedDate: null,
 
   init(container) {
     this.container = container;
@@ -41,8 +41,6 @@ export const CalendarPage = {
             ${this.renderDays(year, month, events)}
           </div>
         </div>
-
-        ${this.selectedDate ? this.renderEventPanel() : ''}
       </div>
     `;
 
@@ -51,23 +49,21 @@ export const CalendarPage = {
 
   renderDays(year, month, events) {
     const daysData = getMonthDays(year, month);
-    const today = new Date();
 
     return daysData.map(({ date, isOtherMonth }) => {
       const dateStr = getDateString(date);
       const dayEvents = events.filter(e => getDateString(e.date) === dateStr);
-      const isSelected = this.selectedDate && getDateString(date) === getDateString(this.selectedDate);
       const isTodayDate = isToday(date);
 
       return `
-        <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isTodayDate ? 'today' : ''} ${isSelected ? 'selected' : ''}"
+        <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isTodayDate ? 'today' : ''}"
              data-date="${dateStr}">
           <div class="calendar-day-number">${date.getDate()}</div>
           <div class="calendar-events">
             ${dayEvents.slice(0, 3).map(e => `
               <div class="calendar-event ${e.type}"
                    style="--event-color: ${e.courseColor || '#4f46e5'}"
-                   data-event-id="${e.id}"
+                   data-course-id="${e.courseId}"
                    data-event-type="${e.type}">
                 ${e.title}
               </div>
@@ -81,73 +77,79 @@ export const CalendarPage = {
     }).join('');
   },
 
-  renderEventPanel() {
-    const events = Store.getEventsForDate(this.selectedDate);
-    const date = new Date(this.selectedDate);
+  showDayModal(dateStr) {
+    const events = Store.getEventsForDate(dateStr);
+    const date = new Date(dateStr);
+    const dateDisplay = `${date.getMonth() + 1}月${date.getDate()}日`;
 
-    return `
-      <div class="event-panel">
-        <div class="event-panel-header">
-          <div class="event-panel-title">${date.getMonth() + 1}月${date.getDate()}日</div>
-          <div class="event-panel-date">${events.length} 个事件</div>
-        </div>
-        <div class="event-panel-list">
-          ${events.length > 0
-            ? events.map(e => `
-                <div class="event-panel-item">
-                  <div class="event-panel-item-color" style="background: ${e.courseColor || '#4f46e5'}"></div>
-                  <div class="event-panel-item-content">
-                    <div class="event-panel-item-title">${e.title}</div>
-                    <div class="event-panel-item-time">${e.time || ''} ${e.endTime ? '- ' + e.endTime : ''}</div>
-                    ${e.location ? `<div class="event-panel-item-course">📍 ${e.location}</div>` : ''}
-                    ${e.courseName && e.type === 'deadline' ? `<div class="event-panel-item-course">📚 ${e.courseName}</div>` : ''}
-                  </div>
+    const content = `
+      <div class="event-panel-list">
+        ${events.length > 0
+          ? events.map(e => `
+              <div class="event-panel-item" ${e.type === 'class' ? `data-go-course="${e.courseId}" style="cursor:pointer"` : ''}>
+                <div class="event-panel-item-color" style="background: ${e.courseColor || '#4f46e5'}"></div>
+                <div class="event-panel-item-content">
+                  <div class="event-panel-item-title">${e.title}</div>
+                  <div class="event-panel-item-time">${e.time || ''} ${e.endTime ? '- ' + e.endTime : ''}</div>
+                  ${e.location ? `<div class="event-panel-item-course">📍 ${e.location}</div>` : ''}
+                  ${e.courseName && e.type === 'deadline' ? `<div class="event-panel-item-course">📚 ${e.courseName}</div>` : ''}
                 </div>
-              `).join('')
-            : '<p class="text-secondary">当天没有事件</p>'
-          }
-        </div>
+              </div>
+            `).join('')
+          : '<p class="text-secondary">当天没有事件</p>'
+        }
       </div>
     `;
+
+    const footer = `
+      <button type="button" class="btn btn-secondary" data-close>关闭</button>
+    `;
+
+    const modal = Modal.open(`${dateDisplay}日程`, content, footer);
+
+    // Click on course item to go to course
+    modal.querySelectorAll('[data-go-course]').forEach(item => {
+      item.addEventListener('click', () => {
+        const courseId = item.dataset.goCourse;
+        Modal.close();
+        window.location.hash = `course/${courseId}`;
+      });
+    });
   },
 
   attachEventListeners() {
     // Navigation
     $('[data-prev-month]', this.container)?.addEventListener('click', () => {
       this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-      this.selectedDate = null;
       this.render();
     });
 
     $('[data-next-month]', this.container)?.addEventListener('click', () => {
       this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-      this.selectedDate = null;
       this.render();
     });
 
     $('[data-today]', this.container)?.addEventListener('click', () => {
       this.currentDate = new Date();
-      this.selectedDate = null;
       this.render();
     });
 
-    // Day selection
+    // Day selection - show modal
     this.container.querySelectorAll('.calendar-day').forEach(day => {
-      day.addEventListener('click', () => {
-        this.selectedDate = day.dataset.date;
-        this.render();
+      day.addEventListener('click', (e) => {
+        // Don't show modal if clicking on an event
+        if (!e.target.closest('.calendar-event')) {
+          this.showDayModal(day.dataset.date);
+        }
       });
     });
 
-    // Event click
+    // Event click - go to course
     this.container.querySelectorAll('.calendar-event').forEach(event => {
       event.addEventListener('click', (e) => {
         e.stopPropagation();
-        const eventType = event.dataset.eventType;
-        if (eventType === 'class') {
-          // Navigate to course - extract courseId from event id
-          const eventId = event.dataset.eventId;
-          const courseId = eventId.split('-').slice(0, -1).join('-');
+        const courseId = event.dataset.courseId;
+        if (courseId) {
           window.location.hash = `course/${courseId}`;
         }
       });
