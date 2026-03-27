@@ -42,27 +42,20 @@ export const Modal = {
   },
 
   close() {
-    console.log('Modal.close called, activeModal:', activeModal);
-    if (activeModal) {
-      const modalEl = activeModal.querySelector('.modal');
-      console.log('Modal element:', modalEl);
-      if (modalEl) {
-        modalEl.style.display = 'none';
-        console.log('Set modal display to none');
-      }
-      activeModal.style.display = 'none';
-      console.log('Set overlay display to none');
-      setTimeout(() => {
-        if (activeModal && activeModal.parentNode) {
-          activeModal.parentNode.removeChild(activeModal);
-          console.log('Force removed from DOM');
-        }
-        activeModal = null;
-        console.log('Modal closed and removed');
-      }, 10);
-    } else {
-      console.log('No active modal to close');
+    console.log('Modal.close() called, activeModal:', activeModal);
+    if (!activeModal) {
+      console.log('No active modal');
+      return;
     }
+    console.log('Modal parentNode:', activeModal.parentNode);
+    if (activeModal.parentNode) {
+      activeModal.parentNode.removeChild(activeModal);
+      console.log('Removed from DOM');
+    } else {
+      console.log('No parentNode - already detached?');
+    }
+    activeModal = null;
+    console.log('Modal closed');
   },
 
   getContainer() {
