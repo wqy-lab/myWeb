@@ -1,7 +1,7 @@
 // Calendar page
 
 import { Store } from '../store.js';
-import { getMonthDays, isToday, isSameMonth, days, getDateString } from '../utils.js';
+import { $, getMonthDays, isToday, isSameMonth, days, getDateString } from '../utils.js';
 
 export const CalendarPage = {
   container: null,
