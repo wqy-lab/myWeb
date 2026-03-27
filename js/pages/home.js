@@ -244,7 +244,6 @@ export const HomePage = {
         this.render();
       }
     });
-    });
   },
 
   confirmDeleteCourse(courseId) {
