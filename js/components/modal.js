@@ -44,9 +44,22 @@ export const Modal = {
   close() {
     console.log('Modal.close called, activeModal:', activeModal);
     if (activeModal) {
-      activeModal.remove();
-      activeModal = null;
-      console.log('Modal closed and removed');
+      const modalEl = activeModal.querySelector('.modal');
+      console.log('Modal element:', modalEl);
+      if (modalEl) {
+        modalEl.style.display = 'none';
+        console.log('Set modal display to none');
+      }
+      activeModal.style.display = 'none';
+      console.log('Set overlay display to none');
+      setTimeout(() => {
+        if (activeModal && activeModal.parentNode) {
+          activeModal.parentNode.removeChild(activeModal);
+          console.log('Force removed from DOM');
+        }
+        activeModal = null;
+        console.log('Modal closed and removed');
+      }, 10);
     } else {
       console.log('No active modal to close');
     }
