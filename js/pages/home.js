@@ -196,53 +196,52 @@ export const HomePage = {
 
   setupFormEvents(modal, courseId = null) {
     const form = $('form', modal);
+    const saveBtn = modal.querySelector('[data-save]');
+    const cancelBtn = modal.querySelector('[data-close]');
+    const addScheduleBtn = modal.querySelector('#add-schedule');
+    const colorOptions = modal.querySelectorAll('.color-option');
     let scheduleCount = form.querySelectorAll('.schedule-row').length;
 
-    // Use event delegation on modal
+    // Save button
+    saveBtn.addEventListener('click', () => {
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const data = CourseCard.getFormData(form);
+      if (courseId) {
+        Store.updateCourse(courseId, data);
+      } else {
+        Store.addCourse({ id: generateId(), ...data, assignments: [] });
+      }
+      Modal.close();
+      this.render();
+    });
+
+    // Cancel button - just close modal (Modal component handles this)
+    cancelBtn.addEventListener('click', () => Modal.close());
+
+    // Add schedule
+    addScheduleBtn.addEventListener('click', () => {
+      const scheduleInputs = $('#schedule-inputs', modal);
+      scheduleInputs.insertAdjacentHTML('beforeend',
+        CourseCard.renderScheduleRow({}, scheduleCount++));
+    });
+
+    // Remove schedule
     modal.addEventListener('click', (e) => {
-      const colorOpt = e.target.closest('.color-option');
-      if (colorOpt) {
-        modal.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-        colorOpt.classList.add('selected');
-      }
-
-      // Add schedule row
-      if (e.target.id === 'add-schedule' || e.target.closest('#add-schedule')) {
-        const scheduleInputs = $('#schedule-inputs', modal);
-        if (scheduleInputs) {
-          scheduleInputs.insertAdjacentHTML('beforeend',
-            CourseCard.renderScheduleRow({}, scheduleCount++));
-        }
-      }
-
-      // Remove schedule row
       const removeBtn = e.target.closest('[data-remove-schedule]');
       if (removeBtn) {
         removeBtn.closest('.schedule-row').remove();
       }
+    });
 
-      // Save
-      if (e.target.closest('[data-save]')) {
-        if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-        }
-
-        const data = CourseCard.getFormData(form);
-
-        if (courseId) {
-          Store.updateCourse(courseId, data);
-        } else {
-          Store.addCourse({
-            id: generateId(),
-            ...data,
-            assignments: []
-          });
-        }
-
-        Modal.close();
-        this.render();
-      }
+    // Color picker
+    colorOptions.forEach(opt => {
+      opt.addEventListener('click', () => {
+        colorOptions.forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
     });
   },
 
@@ -257,12 +256,15 @@ export const HomePage = {
     `;
 
     const modal = Modal.open('删除课程', content, footer);
-    modal.addEventListener('click', (e) => {
-      if (e.target.closest('[data-delete]')) {
-        Store.deleteCourse(courseId);
-        Modal.close();
-        this.render();
-      }
+    const deleteBtn = modal.querySelector('[data-delete]');
+    const cancelBtn = modal.querySelector('[data-close]');
+
+    deleteBtn.addEventListener('click', () => {
+      Store.deleteCourse(courseId);
+      Modal.close();
+      this.render();
     });
+
+    cancelBtn.addEventListener('click', () => Modal.close());
   }
 };

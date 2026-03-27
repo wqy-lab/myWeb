@@ -153,36 +153,35 @@ export const CoursePage = {
 
   setupAssignmentFormEvents(modal, assignmentId = null) {
     const form = $('form', modal);
+    const saveBtn = modal.querySelector('[data-save]');
+    const cancelBtn = modal.querySelector('[data-close]');
 
-    modal.addEventListener('click', (e) => {
-      if (e.target.closest('[data-save]')) {
-        if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-        }
-
-        const formData = new FormData(form);
-        const data = {
-          title: formData.get('title'),
-          description: formData.get('description'),
-          dueDate: formData.get('dueDate') || null
-        };
-
-        if (assignmentId) {
-          Store.updateAssignment(this.courseId, assignmentId, data);
-        } else {
-          Store.addAssignment(this.courseId, {
-            id: generateId(),
-            ...data,
-            files: [],
-            submittedAt: null
-          });
-        }
-
-        Modal.close();
-        this.render(this.courseId);
+    saveBtn.addEventListener('click', () => {
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
       }
+      const formData = new FormData(form);
+      const data = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        dueDate: formData.get('dueDate') || null
+      };
+      if (assignmentId) {
+        Store.updateAssignment(this.courseId, assignmentId, data);
+      } else {
+        Store.addAssignment(this.courseId, {
+          id: generateId(),
+          ...data,
+          files: [],
+          submittedAt: null
+        });
+      }
+      Modal.close();
+      this.render(this.courseId);
     });
+
+    cancelBtn.addEventListener('click', () => Modal.close());
   },
 
   confirmDeleteAssignment(assignmentId) {
@@ -197,13 +196,16 @@ export const CoursePage = {
     `;
 
     const modal = Modal.open('删除作业', content, footer);
-    modal.addEventListener('click', (e) => {
-      if (e.target.closest('[data-delete]')) {
-        Store.deleteAssignment(this.courseId, assignmentId);
-        Modal.close();
-        this.render(this.courseId);
-      }
+    const deleteBtn = modal.querySelector('[data-delete]');
+    const cancelBtn = modal.querySelector('[data-close]');
+
+    deleteBtn.addEventListener('click', () => {
+      Store.deleteAssignment(this.courseId, assignmentId);
+      Modal.close();
+      this.render(this.courseId);
     });
+
+    cancelBtn.addEventListener('click', () => Modal.close());
   },
 
   showUploadModal(assignmentId) {
