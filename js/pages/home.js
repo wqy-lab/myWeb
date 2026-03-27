@@ -259,8 +259,11 @@ export const HomePage = {
     const deleteBtn = modal.querySelector('[data-delete]');
     const cancelBtn = modal.querySelector('[data-close]');
 
+    console.log('Delete modal opened, deleteBtn:', deleteBtn, 'cancelBtn:', cancelBtn);
+
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      console.log('Delete button clicked!');
       Store.deleteCourse(courseId);
       Modal.close();
       this.render();
@@ -268,6 +271,7 @@ export const HomePage = {
 
     cancelBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      console.log('Cancel button clicked!');
       Modal.close();
     });
   }
