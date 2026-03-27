@@ -128,8 +128,8 @@ export const CoursePage = {
   showAddAssignmentModal() {
     const content = AssignmentItem.renderForm();
     const footer = `
-      <button class="btn btn-secondary" data-close>取消</button>
-      <button class="btn btn-primary" data-save>保存</button>
+      <button type="button" class="btn btn-secondary" data-close>取消</button>
+      <button type="button" class="btn btn-primary" data-save>保存</button>
     `;
 
     const modal = Modal.open('添加作业', content, footer);
@@ -143,8 +143,8 @@ export const CoursePage = {
 
     const content = AssignmentItem.renderForm(assignment);
     const footer = `
-      <button class="btn btn-secondary" data-close>取消</button>
-      <button class="btn btn-primary" data-save>保存</button>
+      <button type="button" class="btn btn-secondary" data-close>取消</button>
+      <button type="button" class="btn btn-primary" data-save>保存</button>
     `;
 
     const modal = Modal.open('编辑作业', content, footer);
@@ -191,8 +191,8 @@ export const CoursePage = {
 
     const content = `<p>确定要删除作业「${assignment.title}」吗？</p>`;
     const footer = `
-      <button class="btn btn-secondary" data-close>取消</button>
-      <button class="btn btn-danger" data-delete>删除</button>
+      <button type="button" class="btn btn-secondary" data-close>取消</button>
+      <button type="button" class="btn btn-danger" data-delete>删除</button>
     `;
 
     const modal = Modal.open('删除作业', content, footer);
@@ -231,7 +231,7 @@ export const CoursePage = {
     `;
 
     const footer = `
-      <button class="btn btn-secondary" data-close>关闭</button>
+      <button type="button" class="btn btn-secondary" data-close>关闭</button>
     `;
 
     const modal = Modal.open('上传作业', content, footer);

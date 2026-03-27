@@ -172,8 +172,8 @@ export const HomePage = {
   showAddCourseModal() {
     const content = CourseCard.renderForm();
     const footer = `
-      <button class="btn btn-secondary" data-close>取消</button>
-      <button class="btn btn-primary" data-save>保存</button>
+      <button type="button" class="btn btn-secondary" data-close>取消</button>
+      <button type="button" class="btn btn-primary" data-save>保存</button>
     `;
 
     const modal = Modal.open('添加课程', content, footer);
@@ -186,8 +186,8 @@ export const HomePage = {
 
     const content = CourseCard.renderForm(course);
     const footer = `
-      <button class="btn btn-secondary" data-close>取消</button>
-      <button class="btn btn-primary" data-save>保存</button>
+      <button type="button" class="btn btn-secondary" data-close>取消</button>
+      <button type="button" class="btn btn-primary" data-save>保存</button>
     `;
 
     const modal = Modal.open('编辑课程', content, footer);
@@ -253,8 +253,8 @@ export const HomePage = {
 
     const content = `<p>确定要删除课程「${course.name}」吗？此操作不可撤销。</p>`;
     const footer = `
-      <button class="btn btn-secondary" data-close>取消</button>
-      <button class="btn btn-danger" data-delete>删除</button>
+      <button type="button" class="btn btn-secondary" data-close>取消</button>
+      <button type="button" class="btn btn-danger" data-delete>删除</button>
     `;
 
     const modal = Modal.open('删除课程', content, footer);
