@@ -107,17 +107,17 @@ export const Store = {
 
     this.data.courses.forEach(course => {
       // Class schedule events
-      course.schedule?.forEach(sched => {
+      course.schedule?.forEach((sched, schedIndex) => {
         const classDate = this.getNextClassDate(sched.day, startDate);
         while (classDate <= endDate) {
           events.push({
-            id: `${course.id}-${sched.day}-${classDate.getTime()}`,
+            id: `${course.id}-${schedIndex}-${sched.day}-${classDate.getTime()}`,
             type: 'class',
             courseId: course.id,
             courseName: course.name,
             courseColor: course.color,
             title: course.name,
-            date: classDate,
+            date: new Date(classDate),
             time: sched.startTime,
             endTime: sched.endTime,
             location: sched.location
@@ -172,10 +172,10 @@ export const Store = {
     const events = [];
 
     this.data.courses.forEach(course => {
-      course.schedule?.forEach(sched => {
+      course.schedule?.forEach((sched, schedIndex) => {
         if (sched.day === targetDate.getDay()) {
           events.push({
-            id: `${course.id}-${sched.day}`,
+            id: `${course.id}-${schedIndex}-${sched.day}`,
             type: 'class',
             courseId: course.id,
             courseName: course.name,
