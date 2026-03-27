@@ -138,39 +138,39 @@ export const HomePage = {
       e.preventDefault();
       const card = e.target.closest('.course-card');
 
-      if (draggedCard) {
-        let targetGrid;
-        if (card) {
-          targetGrid = card.closest('.course-grid');
-          const afterElement = this.getDragAfterElement(targetGrid, e.clientY);
-          if (afterElement) {
-            targetGrid.insertBefore(draggedCard, afterElement);
-          } else {
-            targetGrid.appendChild(draggedCard);
-          }
-        } else {
-          // Dropped on empty area - find which grid based on mouse position
-          const pastGrid = this.container.querySelector('#past-courses');
-          const currentGrid = this.container.querySelector('#current-courses');
-          const rect = pastGrid.getBoundingClientRect();
+      if (!draggedCard) return;
 
-          if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
-            targetGrid = pastGrid;
-          } else {
-            targetGrid = currentGrid;
-          }
+      let targetGrid;
+      const courseId = draggedCard.dataset.courseId;
+
+      if (card && card !== draggedCard) {
+        targetGrid = card.closest('.course-grid');
+        const afterElement = this.getDragAfterElement(targetGrid, e.clientY);
+        if (afterElement && afterElement !== draggedCard) {
+          targetGrid.insertBefore(draggedCard, afterElement);
+        } else {
           targetGrid.appendChild(draggedCard);
         }
+      } else if (card === draggedCard) {
+        // Dropped on self, do nothing
+        return;
+      } else {
+        // Dropped on empty area
+        const pastGrid = this.container.querySelector('#past-courses');
+        const currentGrid = this.container.querySelector('#current-courses');
+        const rect = pastGrid.getBoundingClientRect();
 
+        targetGrid = (e.clientY >= rect.top && e.clientY <= rect.bottom) ? pastGrid : currentGrid;
+        targetGrid.appendChild(draggedCard);
+      }
+
+      // If dropped in different grid, update course status and re-render
+      if (targetGrid !== sourceGrid) {
+        const newStatus = targetGrid.dataset.status;
+        Store.updateCourse(courseId, { status: newStatus });
+        this.render();
+      } else {
         this.saveOrder();
-
-        // If dropped in different grid, also update course status
-        if (targetGrid !== sourceGrid) {
-          const courseId = draggedCard.dataset.courseId;
-          const newStatus = targetGrid.dataset.status;
-          Store.updateCourse(courseId, { status: newStatus });
-          this.render();
-        }
       }
 
       this.container.querySelectorAll('.course-card').forEach(c => c.classList.remove('drag-over'));
