@@ -94,59 +94,86 @@ export const HomePage = {
   },
 
   initDragAndDrop() {
-    const grids = this.container.querySelectorAll('.course-grid');
+    let draggedCard = null;
+    let sourceGrid = null;
 
-    grids.forEach(grid => {
-      let draggedCard = null;
+    // Use event delegation on the container for all drag events
+    this.container.addEventListener('dragstart', (e) => {
+      const card = e.target.closest('.course-card');
+      if (card) {
+        draggedCard = card;
+        sourceGrid = card.closest('.course-grid');
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.dataset.courseId);
+      }
+    });
 
-      grid.addEventListener('dragstart', (e) => {
-        const card = e.target.closest('.course-card');
+    this.container.addEventListener('dragend', (e) => {
+      const card = e.target.closest('.course-card');
+      if (card) {
+        card.classList.remove('dragging');
+      }
+      this.container.querySelectorAll('.course-card').forEach(c => c.classList.remove('drag-over'));
+      draggedCard = null;
+      sourceGrid = null;
+    });
+
+    this.container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const card = e.target.closest('.course-card');
+      if (card && card !== draggedCard) {
+        card.classList.add('drag-over');
+      }
+    });
+
+    this.container.addEventListener('dragleave', (e) => {
+      const card = e.target.closest('.course-card');
+      if (card) {
+        card.classList.remove('drag-over');
+      }
+    });
+
+    this.container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const card = e.target.closest('.course-card');
+
+      if (draggedCard) {
+        let targetGrid;
         if (card) {
-          draggedCard = card;
-          card.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        }
-      });
-
-      grid.addEventListener('dragend', (e) => {
-        const card = e.target.closest('.course-card');
-        if (card) {
-          card.classList.remove('dragging');
-        }
-        grid.querySelectorAll('.course-card').forEach(c => c.classList.remove('drag-over'));
-      });
-
-      grid.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const afterElement = this.getDragAfterElement(grid, e.clientY);
-        const card = e.target.closest('.course-card');
-
-        if (card && card !== draggedCard) {
-          card.classList.add('drag-over');
-        }
-      });
-
-      grid.addEventListener('dragleave', (e) => {
-        const card = e.target.closest('.course-card');
-        if (card) {
-          card.classList.remove('drag-over');
-        }
-      });
-
-      grid.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const card = e.target.closest('.course-card');
-        if (card && card !== draggedCard) {
-          const afterElement = this.getDragAfterElement(grid, e.clientY);
+          targetGrid = card.closest('.course-grid');
+          const afterElement = this.getDragAfterElement(targetGrid, e.clientY);
           if (afterElement) {
-            grid.insertBefore(draggedCard, afterElement);
+            targetGrid.insertBefore(draggedCard, afterElement);
           } else {
-            grid.appendChild(draggedCard);
+            targetGrid.appendChild(draggedCard);
           }
-          this.saveOrder(grid);
+        } else {
+          // Dropped on empty area - find which grid based on mouse position
+          const pastGrid = this.container.querySelector('#past-courses');
+          const currentGrid = this.container.querySelector('#current-courses');
+          const rect = pastGrid.getBoundingClientRect();
+
+          if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
+            targetGrid = pastGrid;
+          } else {
+            targetGrid = currentGrid;
+          }
+          targetGrid.appendChild(draggedCard);
         }
-        grid.querySelectorAll('.course-card').forEach(c => c.classList.remove('drag-over'));
-      });
+
+        this.saveOrder();
+
+        // If dropped in different grid, also update course status
+        if (targetGrid !== sourceGrid) {
+          const courseId = draggedCard.dataset.courseId;
+          const newStatus = targetGrid.dataset.status;
+          Store.updateCourse(courseId, { status: newStatus });
+          this.render();
+        }
+      }
+
+      this.container.querySelectorAll('.course-card').forEach(c => c.classList.remove('drag-over'));
     });
   },
 
@@ -163,10 +190,13 @@ export const HomePage = {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
   },
 
-  saveOrder(grid) {
-    const courseIds = [...grid.querySelectorAll('.course-card')]
+  saveOrder() {
+    // Get all course IDs in order (current courses first, then past courses)
+    const currentIds = [...this.container.querySelectorAll('#current-courses .course-card')]
       .map(card => card.dataset.courseId);
-    Store.reorderCourses(courseIds);
+    const pastIds = [...this.container.querySelectorAll('#past-courses .course-card')]
+      .map(card => card.dataset.courseId);
+    Store.reorderCourses([...currentIds, ...pastIds]);
   },
 
   showAddCourseModal() {
