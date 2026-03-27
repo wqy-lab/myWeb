@@ -4,6 +4,12 @@ let activeModal = null;
 
 export const Modal = {
   open(title, content, footer = '') {
+    // Close any existing modal first
+    if (activeModal) {
+      document.body.removeChild(activeModal);
+      activeModal = null;
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
@@ -42,15 +48,11 @@ export const Modal = {
   },
 
   close() {
-    console.log('Modal.close() called');
     if (activeModal) {
       activeModal.style.display = 'none';
       activeModal.style.visibility = 'hidden';
-      activeModal.style.opacity = '0';
-      activeModal.innerHTML = '';
       document.body.removeChild(activeModal);
       activeModal = null;
-      console.log('Modal forcefully closed');
     }
   },
 

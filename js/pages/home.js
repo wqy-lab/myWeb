@@ -249,6 +249,12 @@ export const HomePage = {
     const course = Store.getCourse(courseId);
     if (!course) return;
 
+    // Remove any existing modal first
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
     const content = `<p>确定要删除课程「${course.name}」吗？此操作不可撤销。</p>`;
     const footer = `
       <button type="button" class="btn btn-secondary" data-close>取消</button>
@@ -259,23 +265,19 @@ export const HomePage = {
     const deleteBtn = modal.querySelector('[data-delete]');
     const cancelBtn = modal.querySelector('[data-close]');
 
-    console.log('Delete modal opened, deleteBtn:', deleteBtn, 'cancelBtn:', cancelBtn);
-
+    // Use { once: true } to prevent duplicate handlers
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('Delete button clicked! About to delete course:', courseId);
+      e.preventDefault();
       Store.deleteCourse(courseId);
-      console.log('Course deleted, closing modal...');
       Modal.close();
-      console.log('Modal closed, about to render...');
       this.render();
-      console.log('Render complete');
-    });
+    }, { once: true });
 
     cancelBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('Cancel button clicked!');
+      e.preventDefault();
       Modal.close();
-    });
+    }, { once: true });
   }
 };
