@@ -263,10 +263,13 @@ export const HomePage = {
 
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('Delete button clicked!');
+      console.log('Delete button clicked! About to delete course:', courseId);
       Store.deleteCourse(courseId);
+      console.log('Course deleted, closing modal...');
       Modal.close();
+      console.log('Modal closed, about to render...');
       this.render();
+      console.log('Render complete');
     });
 
     cancelBtn.addEventListener('click', (e) => {

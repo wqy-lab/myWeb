@@ -42,20 +42,16 @@ export const Modal = {
   },
 
   close() {
-    console.log('Modal.close() called, activeModal:', activeModal);
-    if (!activeModal) {
-      console.log('No active modal');
-      return;
+    console.log('Modal.close() called');
+    if (activeModal) {
+      activeModal.style.display = 'none';
+      activeModal.style.visibility = 'hidden';
+      activeModal.style.opacity = '0';
+      activeModal.innerHTML = '';
+      document.body.removeChild(activeModal);
+      activeModal = null;
+      console.log('Modal forcefully closed');
     }
-    console.log('Modal parentNode:', activeModal.parentNode);
-    if (activeModal.parentNode) {
-      activeModal.parentNode.removeChild(activeModal);
-      console.log('Removed from DOM');
-    } else {
-      console.log('No parentNode - already detached?');
-    }
-    activeModal = null;
-    console.log('Modal closed');
   },
 
   getContainer() {
