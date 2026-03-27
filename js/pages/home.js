@@ -22,6 +22,12 @@ export const HomePage = {
         <div class="section">
           <div class="section-header">
             <h2 class="section-title">当前课程</h2>
+            <button class="btn btn-primary" data-action="add-course">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              添加课程
+            </button>
           </div>
           <div class="course-grid" id="current-courses" data-status="current">
             ${currentCourses.length > 0
