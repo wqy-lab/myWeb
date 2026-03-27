@@ -156,7 +156,8 @@ export const CoursePage = {
     const saveBtn = modal.querySelector('[data-save]');
     const cancelBtn = modal.querySelector('[data-close]');
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -181,7 +182,10 @@ export const CoursePage = {
       this.render(this.courseId);
     });
 
-    cancelBtn.addEventListener('click', () => Modal.close());
+    cancelBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      Modal.close();
+    });
   },
 
   confirmDeleteAssignment(assignmentId) {
@@ -199,13 +203,17 @@ export const CoursePage = {
     const deleteBtn = modal.querySelector('[data-delete]');
     const cancelBtn = modal.querySelector('[data-close]');
 
-    deleteBtn.addEventListener('click', () => {
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       Store.deleteAssignment(this.courseId, assignmentId);
       Modal.close();
       this.render(this.courseId);
     });
 
-    cancelBtn.addEventListener('click', () => Modal.close());
+    cancelBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      Modal.close();
+    });
   },
 
   showUploadModal(assignmentId) {
