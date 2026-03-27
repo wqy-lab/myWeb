@@ -196,10 +196,9 @@ export const HomePage = {
 
   setupFormEvents(modal, courseId = null) {
     const form = $('form', modal);
-    const saveBtn = $('[data-save]', modal);
     let scheduleCount = form.querySelectorAll('.schedule-row').length;
 
-    // Color picker - use event delegation on modal
+    // Use event delegation on modal
     modal.addEventListener('click', (e) => {
       const colorOpt = e.target.closest('.color-option');
       if (colorOpt) {
@@ -221,29 +220,30 @@ export const HomePage = {
       if (removeBtn) {
         removeBtn.closest('.schedule-row').remove();
       }
+
+      // Save
+      if (e.target.closest('[data-save]')) {
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        const data = CourseCard.getFormData(form);
+
+        if (courseId) {
+          Store.updateCourse(courseId, data);
+        } else {
+          Store.addCourse({
+            id: generateId(),
+            ...data,
+            assignments: []
+          });
+        }
+
+        Modal.close();
+        this.render();
+      }
     });
-
-    // Save
-    saveBtn.addEventListener('click', () => {
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-
-      const data = CourseCard.getFormData(form);
-
-      if (courseId) {
-        Store.updateCourse(courseId, data);
-      } else {
-        Store.addCourse({
-          id: generateId(),
-          ...data,
-          assignments: []
-        });
-      }
-
-      Modal.close();
-      this.render();
     });
   },
 
@@ -258,11 +258,12 @@ export const HomePage = {
     `;
 
     const modal = Modal.open('删除课程', content, footer);
-    const deleteBtn = $('[data-delete]', modal);
-    deleteBtn.addEventListener('click', () => {
-      Store.deleteCourse(courseId);
-      Modal.close();
-      this.render();
+    modal.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete]')) {
+        Store.deleteCourse(courseId);
+        Modal.close();
+        this.render();
+      }
     });
   }
 };

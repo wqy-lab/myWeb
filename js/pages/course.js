@@ -153,34 +153,35 @@ export const CoursePage = {
 
   setupAssignmentFormEvents(modal, assignmentId = null) {
     const form = $('form', modal);
-    const saveBtn = $('[data-save]', modal);
 
-    saveBtn.addEventListener('click', () => {
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
+    modal.addEventListener('click', (e) => {
+      if (e.target.closest('[data-save]')) {
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        const formData = new FormData(form);
+        const data = {
+          title: formData.get('title'),
+          description: formData.get('description'),
+          dueDate: formData.get('dueDate') || null
+        };
+
+        if (assignmentId) {
+          Store.updateAssignment(this.courseId, assignmentId, data);
+        } else {
+          Store.addAssignment(this.courseId, {
+            id: generateId(),
+            ...data,
+            files: [],
+            submittedAt: null
+          });
+        }
+
+        Modal.close();
+        this.render(this.courseId);
       }
-
-      const formData = new FormData(form);
-      const data = {
-        title: formData.get('title'),
-        description: formData.get('description'),
-        dueDate: formData.get('dueDate') || null
-      };
-
-      if (assignmentId) {
-        Store.updateAssignment(this.courseId, assignmentId, data);
-      } else {
-        Store.addAssignment(this.courseId, {
-          id: generateId(),
-          ...data,
-          files: [],
-          submittedAt: null
-        });
-      }
-
-      Modal.close();
-      this.render(this.courseId);
     });
   },
 
@@ -196,10 +197,12 @@ export const CoursePage = {
     `;
 
     const modal = Modal.open('删除作业', content, footer);
-    $('[data-delete]', modal).addEventListener('click', () => {
-      Store.deleteAssignment(this.courseId, assignmentId);
-      Modal.close();
-      this.render(this.courseId);
+    modal.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete]')) {
+        Store.deleteAssignment(this.courseId, assignmentId);
+        Modal.close();
+        this.render(this.courseId);
+      }
     });
   },
 
