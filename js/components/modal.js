@@ -42,9 +42,13 @@ export const Modal = {
   },
 
   close() {
+    console.log('Modal.close called, activeModal:', activeModal);
     if (activeModal) {
       activeModal.remove();
       activeModal = null;
+      console.log('Modal closed and removed');
+    } else {
+      console.log('No active modal to close');
     }
   },
 
