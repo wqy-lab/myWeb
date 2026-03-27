@@ -196,38 +196,27 @@ export const HomePage = {
 
   setupFormEvents(modal, courseId = null) {
     const form = $('form', modal);
-    const colorOptions = $$('.color-option', modal);
-    const addScheduleBtn = $('#add-schedule', modal);
     const saveBtn = $('[data-save]', modal);
-
-    // Color picker
-    colorOptions.forEach(opt => {
-      opt.addEventListener('click', () => {
-        colorOptions.forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-      });
-    });
-
-    // Pre-select current color
-    const currentColor = form.querySelector('.color-option.selected');
-    if (currentColor) {
-      colorOptions.forEach(o => {
-        if (o.dataset.color === currentColor.dataset.color) {
-          o.classList.add('selected');
-        }
-      });
-    }
-
-    // Add schedule row
     let scheduleCount = form.querySelectorAll('.schedule-row').length;
-    addScheduleBtn.addEventListener('click', () => {
-      const scheduleInputs = $('#schedule-inputs', modal);
-      scheduleInputs.insertAdjacentHTML('beforeend',
-        CourseCard.renderScheduleRow({}, scheduleCount++));
-    });
 
-    // Remove schedule row
+    // Color picker - use event delegation on modal
     modal.addEventListener('click', (e) => {
+      const colorOpt = e.target.closest('.color-option');
+      if (colorOpt) {
+        modal.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        colorOpt.classList.add('selected');
+      }
+
+      // Add schedule row
+      if (e.target.id === 'add-schedule' || e.target.closest('#add-schedule')) {
+        const scheduleInputs = $('#schedule-inputs', modal);
+        if (scheduleInputs) {
+          scheduleInputs.insertAdjacentHTML('beforeend',
+            CourseCard.renderScheduleRow({}, scheduleCount++));
+        }
+      }
+
+      // Remove schedule row
       const removeBtn = e.target.closest('[data-remove-schedule]');
       if (removeBtn) {
         removeBtn.closest('.schedule-row').remove();

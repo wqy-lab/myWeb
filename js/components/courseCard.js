@@ -129,12 +129,13 @@ export const CourseCard = {
 
   getFormData(form) {
     const formData = new FormData(form);
+    const selectedColor = form.closest('.modal-overlay')?.querySelector('.color-option.selected');
     const data = {
       name: formData.get('name'),
       teacher: formData.get('teacher'),
       description: formData.get('description'),
       status: formData.get('status'),
-      color: document.querySelector('.color-option.selected')?.dataset.color || '#4f46e5',
+      color: selectedColor?.dataset.color || '#4f46e5',
       schedule: []
     };
 
